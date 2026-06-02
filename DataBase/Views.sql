@@ -1,3 +1,5 @@
+USE petvida;
+
 CREATE OR REPLACE VIEW vw_consultas_completas AS
 SELECT 
     c.data_hora,
@@ -12,24 +14,19 @@ SELECT
     esp.nome AS especialidade,
     p.forma_pagamento,
     p.status_pagamento
-FROM consulta c
-INNER JOIN animal a ON c.id_animal = a.id
-INNER JOIN especie e ON a.id_especie = e.id
-INNER JOIN tutor t ON a.id_tutor = t.id
-INNER JOIN veterinario v ON c.id_veterinario = v.id
-INNER JOIN especialidade esp ON v.id_especialidade = esp.id
-LEFT JOIN pagamento p ON c.id = p.id_consulta;
+FROM consultas c
+INNER JOIN animais a ON c.animal_id = a.id
+INNER JOIN especies e ON a.especie_id = e.id
+INNER JOIN tutores t ON a.tutor_id = t.id
+INNER JOIN veterinarios v ON c.veterinario_id = v.id
+INNER JOIN especialidades esp ON v.specialidade_id = esp.id
+LEFT JOIN pagamentos p ON c.id = p.consulta_id;
 
 
 CREATE OR REPLACE VIEW vw_agenda_hoje AS
 SELECT 
     TIME(data_hora) AS hora,
-    animal,
-    especie,
-    tutor,
-    telefone,
-    veterinario,
-    status
+    animal, especie, tutor, telefone, veterinario, status
 FROM vw_consultas_completas
 WHERE DATE(data_hora) = CURDATE()
 ORDER BY hora ASC;
@@ -43,10 +40,8 @@ SELECT
     COUNT(*) AS total_consultas,
     SUM(valor) AS faturamento_bruto
 FROM vw_consultas_completas
-WHERE status_pagamento = 'Pago'
+WHERE status_pagamento = 'pago'
 GROUP BY YEAR(data_hora), MONTH(data_hora), veterinario;
-
-
 
 CREATE OR REPLACE VIEW vw_animais_detalhados AS
 SELECT 
@@ -55,22 +50,16 @@ SELECT
     e.nome AS especie,
     t.nome AS tutor,
     COUNT(c.id) AS total_consultas
-FROM animal a
-INNER JOIN especie e ON a.id_especie = e.id
-INNER JOIN tutor t ON a.id_tutor = t.id
-LEFT JOIN consulta c ON a.id = c.id_animal
+FROM animais a
+INNER JOIN especies e ON a.especie_id = e.id
+INNER JOIN tutores t ON a.tutor_id = t.id
+LEFT JOIN consultas c ON a.id = c.animal_id
 GROUP BY a.id, a.nome, e.nome, t.nome;
-
 
 
 CREATE OR REPLACE VIEW vw_inadimplentes AS
 SELECT 
-    data_hora,
-    tutor,
-    telefone,
-    animal,
-    valor,
-    status_pagamento
+    data_hora, tutor, telefone, animal, valor, status_pagamento
 FROM vw_consultas_completas
-WHERE status = 'Concluída' 
-  AND (status_pagamento = 'Pendente' OR status_pagamento IS NULL);
+WHERE status = 'concluida' 
+  AND (status_pagamento = 'pendente' OR status_pagamento IS NULL);
