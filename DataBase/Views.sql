@@ -21,10 +21,6 @@ INNER JOIN especialidade esp ON v.id_especialidade = esp.id
 LEFT JOIN pagamento p ON c.id = p.id_consulta;
 
 
--- ---------------------------------------------------------------------
--- 2) vw_agenda_hoje
--- Baseada na view anterior, filtrada para o dia atual e ordenada por hora.
--- ---------------------------------------------------------------------
 CREATE OR REPLACE VIEW vw_agenda_hoje AS
 SELECT 
     TIME(data_hora) AS hora,
@@ -39,10 +35,6 @@ WHERE DATE(data_hora) = CURDATE()
 ORDER BY hora ASC;
 
 
--- ---------------------------------------------------------------------
--- 3) vw_faturamento_mensal
--- Agrupamento por ano, mês e veterinário com contagem e soma financeira.
--- ---------------------------------------------------------------------
 CREATE OR REPLACE VIEW vw_faturamento_mensal AS
 SELECT 
     YEAR(data_hora) AS ano,
@@ -51,14 +43,11 @@ SELECT
     COUNT(*) AS total_consultas,
     SUM(valor) AS faturamento_bruto
 FROM vw_consultas_completas
-WHERE status_pagamento = 'Pago' -- Opcional: Garante que só conta o que foi pago
+WHERE status_pagamento = 'Pago'
 GROUP BY YEAR(data_hora), MONTH(data_hora), veterinario;
 
 
--- ---------------------------------------------------------------------
--- 4) vw_animais_detalhados
--- Lista de animais com tutor, espécie e quantidade total de consultas.
--- ---------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW vw_animais_detalhados AS
 SELECT 
     a.id AS id_animal,
@@ -73,10 +62,7 @@ LEFT JOIN consulta c ON a.id = c.id_animal
 GROUP BY a.id, a.nome, e.nome, t.nome;
 
 
--- ---------------------------------------------------------------------
--- 5) vw_inadimplentes
--- Consultas já concluídas que não possuem registro de pagamento ou estão pendentes.
--- ---------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW vw_inadimplentes AS
 SELECT 
     data_hora,
