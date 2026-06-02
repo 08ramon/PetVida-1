@@ -1,5 +1,6 @@
 USE petvida;
 
+-- 1) vw_consultas_completas
 CREATE OR REPLACE VIEW vw_consultas_completas AS
 SELECT 
     c.data_hora,
@@ -19,7 +20,7 @@ INNER JOIN animais a ON c.animal_id = a.id
 INNER JOIN especies e ON a.especie_id = e.id
 INNER JOIN tutores t ON a.tutor_id = t.id
 INNER JOIN veterinarios v ON c.veterinario_id = v.id
-INNER JOIN especialidades esp ON v.specialidade_id = esp.id
+INNER JOIN especialidades esp ON v.especialidade_id = esp.id
 LEFT JOIN pagamentos p ON c.id = p.consulta_id;
 
 
@@ -42,6 +43,7 @@ SELECT
 FROM vw_consultas_completas
 WHERE status_pagamento = 'pago'
 GROUP BY YEAR(data_hora), MONTH(data_hora), veterinario;
+
 
 CREATE OR REPLACE VIEW vw_animais_detalhados AS
 SELECT 
