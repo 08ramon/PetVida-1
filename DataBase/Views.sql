@@ -1,6 +1,5 @@
 USE petvida;
 
--- 1) vw_consultas_completas
 CREATE OR REPLACE VIEW vw_consultas_completas AS
 SELECT 
     c.data_hora,
